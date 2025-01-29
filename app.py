@@ -22,13 +22,37 @@ def index():
 
 @app.route('/contacts')
 def list_contacts():
-    contacts = Contact.query.all()
-    return render_template('contacts.html', contacts=contacts)
+    search_query = request.args.get('search', '').strip()
+    
+    if search_query:
+        # Search in name, email, phone, and type fields
+        contacts = Contact.query.filter(
+            db.or_(
+                Contact.name.ilike(f'%{search_query}%'),
+                Contact.email.ilike(f'%{search_query}%'),
+                Contact.phone.ilike(f'%{search_query}%'),
+                Contact.type.ilike(f'%{search_query}%')
+            )
+        ).all()
+    else:
+        contacts = Contact.query.all()
+        
+    return render_template('contacts.html', contacts=contacts, search_query=search_query)
 
 @app.route('/add', methods=['GET', 'POST'])
 def add_contact():
     form = ContactForm()
     if form.validate_on_submit():
+        # Add validation for empty fields
+        if not form.name.data or not form.phone.data or not form.email.data or not form.type.data:
+            flash('All fields are required!', 'error')
+            return render_template('add_contact.html', form=form)
+            
+        # Add email validation
+        if '@' not in form.email.data or '.' not in form.email.data:
+            flash('Please enter a valid email address!', 'error')
+            return render_template('add_contact.html', form=form)
+            
         contact = Contact(
             name=form.name.data,
             phone=form.phone.data,
@@ -51,20 +75,40 @@ def update_contact(id):
     form = ContactForm(obj=contact)
     
     if form.validate_on_submit():
+        # Add validation for empty fields
+        if not form.name.data or not form.phone.data or not form.email.data or not form.type.data:
+            flash('All fields are required!', 'error')
+            return render_template('update_contact.html', form=form, contact=contact)
+            
+        # Add email validation
+        if '@' not in form.email.data or '.' not in form.email.data:
+            flash('Please enter a valid email address!', 'error')
+            return render_template('update_contact.html', form=form, contact=contact)
+            
         contact.name = form.name.data
         contact.phone = form.phone.data
         contact.email = form.email.data
-        db.session.commit()
-        return redirect(url_for('list_contacts'))
-    
+        contact.type = form.type.data  # Added missing type field update
+        try:
+            db.session.commit()
+            flash('Contact updated successfully!', 'success')
+            return redirect(url_for('list_contacts'))
+        except Exception as e:
+            db.session.rollback()
+            flash('Error updating contact.', 'error')
+            
     return render_template('update_contact.html', form=form, contact=contact)
 
 @app.route('/delete/<int:id>')
 def delete_contact(id):
-    contact = Contact.query.get(id)
-    # Bug: Not actually deleting the contact but returning success
-    # db.session.delete(contact)
-    db.session.commit()
+    contact = Contact.query.get_or_404(id)
+    try:
+        db.session.delete(contact)  # Uncommented the delete operation
+        db.session.commit()
+        flash('Contact deleted successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash('Error deleting contact.', 'error')
     return redirect(url_for('list_contacts'))
 
 # API Routes
@@ -112,12 +156,14 @@ def update_contact_api(id):
 
 @app.route('/api/contacts/<int:id>', methods=['DELETE'])
 def delete_contact_api(id):
-    contact = Contact.query.get(id)
-    if contact:
-        # Bug: Same issue in API - not actually deleting
-        # db.session.delete(contact)
+    contact = Contact.query.get_or_404(id)
+    try:
+        db.session.delete(contact)  # Uncommented the delete operation
         db.session.commit()
-    return '', 204  # Returns success even though nothing was deleted
+        return '', 204
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 400
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001) 
