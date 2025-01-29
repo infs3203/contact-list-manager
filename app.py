@@ -42,29 +42,48 @@ def add_contact():
             return redirect(url_for('list_contacts'))
         except Exception as e:
             db.session.rollback()
-            flash('Error adding contact. Phone number might be duplicate.', 'error')
+            flash('Error adding contact. Please ensure the data is valid and unique.', 'error')
     return render_template('add_contact.html', form=form)
 
 @app.route('/update/<int:id>', methods=['GET', 'POST'])
 def update_contact(id):
     contact = Contact.query.get(id)
-    form = ContactForm(obj=contact)
+    if not contact:
+        flash('Contact not found.', 'error')
+        return redirect(url_for('list_contacts'))
     
+    form = ContactForm(obj=contact)
+
     if form.validate_on_submit():
         contact.name = form.name.data
         contact.phone = form.phone.data
         contact.email = form.email.data
-        db.session.commit()
-        return redirect(url_for('list_contacts'))
-    
+        contact.type = form.type.data
+
+        try:
+            db.session.commit()
+            flash('Contact updated successfully!', 'success')
+            return redirect(url_for('list_contacts'))
+        except Exception as e:
+            db.session.rollback()
+            flash('Error updating contact. Please ensure the data is valid and unique.', 'error')
+
     return render_template('update_contact.html', form=form, contact=contact)
 
 @app.route('/delete/<int:id>')
 def delete_contact(id):
     contact = Contact.query.get(id)
-    # Bug: Not actually deleting the contact but returning success
-    # db.session.delete(contact)
-    db.session.commit()
+    if contact:
+        try:
+            db.session.delete(contact)
+            db.session.commit()
+            flash('Contact deleted successfully!', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error deleting contact: {e}', 'error')
+    else:
+        flash('Contact not found.', 'error')
+
     return redirect(url_for('list_contacts'))
 
 # API Routes
@@ -82,10 +101,26 @@ def get_contact(id):
 def create_contact():
     data = request.get_json()
     
-    if not all(k in data for k in ('name', 'phone', 'type')):
+    # Validate input fields
+    if not all(k in data for k in ('name', 'phone', 'email', 'type')):
         return jsonify({'error': 'Missing required fields'}), 400
-        
-    contact = Contact(**data)
+    
+    # Check if the phone or email already exists
+    existing_contact = Contact.query.filter_by(phone=data['phone']).first()
+    if existing_contact:
+        return jsonify({'error': 'Phone number already exists.'}), 400
+    
+    existing_contact = Contact.query.filter_by(email=data['email']).first()
+    if existing_contact:
+        return jsonify({'error': 'Email already exists.'}), 400
+    
+    contact = Contact(
+        name=data['name'],
+        phone=data['phone'],
+        email=data['email'],
+        type=data['type']
+    )
+    
     try:
         db.session.add(contact)
         db.session.commit()
@@ -98,11 +133,11 @@ def create_contact():
 def update_contact_api(id):
     contact = Contact.query.get_or_404(id)
     data = request.get_json()
-    
+
     for key, value in data.items():
         if hasattr(contact, key):
             setattr(contact, key, value)
-            
+
     try:
         db.session.commit()
         return jsonify(contact.to_dict())
@@ -114,10 +149,14 @@ def update_contact_api(id):
 def delete_contact_api(id):
     contact = Contact.query.get(id)
     if contact:
-        # Bug: Same issue in API - not actually deleting
-        # db.session.delete(contact)
-        db.session.commit()
-    return '', 204  # Returns success even though nothing was deleted
+        try:
+            db.session.delete(contact)
+            db.session.commit()
+            return '', 204
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 400
+    return '', 404  # Contact not found
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001) 
+    app.run(debug=True, port=5001)
