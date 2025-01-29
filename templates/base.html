@@ -5,6 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact List Manager</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Dark Mode Styles */
+        .bg-dark {
+            background-color: #343a40 !important;
+        }
+
+        .text-light {
+            color: #f8f9fa !important;
+        }
+
+        .navbar-dark .navbar-nav .nav-link {
+            color: #f8f9fa;
+        }
+
+        .navbar-dark .navbar-brand {
+            color: #f8f9fa;
+        }
+
+        .table-dark th, .table-dark td {
+            background-color: #343a40;
+            color: #f8f9fa;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -26,6 +49,8 @@
                     </li>
                 </ul>
             </div>
+            <!-- Button to toggle Dark Mode -->
+            <button class="btn btn-outline-light" id="toggle-darkmode">Toggle Dark Mode</button>
         </div>
     </nav>
 
@@ -42,5 +67,23 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- JavaScript for Dark Mode Toggle -->
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('bg-dark', 'text-light');
+        }
+
+        document.getElementById('toggle-darkmode').addEventListener('click', function () {
+            document.body.classList.toggle('bg-dark');
+            document.body.classList.toggle('text-light');
+
+            if (document.body.classList.contains('bg-dark')) {
+                localStorage.setItem('theme', 'dark');
+            } else {
+                localStorage.setItem('theme', 'light');
+            }
+        });
+    </script>
 </body>
-</html> 
+</html>
