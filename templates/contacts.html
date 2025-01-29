@@ -2,16 +2,23 @@
 
 {% block content %}
 <h2>Contacts</h2>
-<div class="mb-3">
-    <input type="text" id="searchInput" class="form-control" placeholder="Search contacts...">
-</div>
-<table class="table">
+
+<!-- Search bar form -->
+<form method="GET" action="{{ url_for('list_contacts') }}" class="mb-3">
+    <div class="input-group">
+        <input type="text" id="searchInput" name="search" value="{{ search_query }}" class="form-control" placeholder="Search contacts...">
+        <button class="btn btn-primary" type="submit">Search</button>
+    </div>
+</form>
+
+<table class="table table-dark">
     <thead>
         <tr>
             <th>Name</th>
             <th>Phone</th>
             <th>Email</th>
             <th>Type</th>
+            <th>Profile Picture</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -23,12 +30,23 @@
             <td>{{ contact.email }}</td>
             <td>{{ contact.type }}</td>
             <td>
+                {% if contact.profile_picture %}
+                    <!-- Display the profile picture if available -->
+                    <img src="{{ url_for('static', filename='uploads/' + contact.profile_picture) }}" 
+                         alt="Profile Picture" width="50" height="50" class="rounded-circle">
+                {% else %}
+                    <!-- Display a default image if no profile picture -->
+                    <img src="{{ url_for('static', filename='default_avatar.png') }}" 
+                         alt="Default Avatar" width="50" height="50" class="rounded-circle">
+                {% endif %}
+            </td>
+            <td>
                 <a href="{{ url_for('update_contact', id=contact.id) }}" class="btn btn-sm btn-primary">Edit</a>
-                <a href="{{ url_for('delete_contact', id=contact.id) }}" class="btn btn-sm btn-danger" 
+                <a href="{{ url_for('delete_contact', id=contact.id) }}" class="btn btn-sm btn-danger"
                    onclick="return confirm('Are you sure you want to delete this contact?')">Delete</a>
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
-{% endblock %} 
+{% endblock %}
