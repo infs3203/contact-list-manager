@@ -13,6 +13,11 @@ class Contact(db.Model):
     type = db.Column(db.String(20), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
+    # New fields
+    profile_picture = db.Column(db.String(120))  # Store image path
+    address = db.Column(db.String(200))          # Store address
+    birthday = db.Column(db.Date)                # Store birthday
+    
     def to_dict(self):
         return {
             'id': self.id,
@@ -20,5 +25,8 @@ class Contact(db.Model):
             'phone': self.phone,
             'email': self.email,
             'type': self.type,
-            'created_at': self.created_at.isoformat()
-        } 
+            'created_at': self.created_at.isoformat(),
+            'profile_picture': self.profile_picture,
+            'address': self.address,
+            'birthday': self.birthday.isoformat() if self.birthday else None
+        }
