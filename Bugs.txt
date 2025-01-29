@@ -1,0 +1,7 @@
+Bugs | Steps to reproduce: 
+1. You can make duplicate fields
+2. Email needs validation - khaled
+3. Empty field needs input validation - hamza
+4. The search does not search - khaled
+5. Delete needs fixing - hamza
+6. Update needs fixing for the type of account - khaled

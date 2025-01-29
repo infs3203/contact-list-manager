@@ -55,8 +55,8 @@ When running the application for the first time, the database will be automatica
 # Make sure your virtual environment is activated
 source venv/bin/activate
 
-# Run the application
-python3 app.py
+# Run the applipython3 app.pycation
+
 ```
 
 #### For Windows:
