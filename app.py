@@ -26,7 +26,7 @@ def allowed_file(filename):
 @app.route('/')
 def index():
     return render_template('index.html')
-
+#fixed contacts duplication
 @app.route('/contacts', methods=['GET', 'POST'])
 def list_contacts():
     search_query = request.args.get('search', '')
