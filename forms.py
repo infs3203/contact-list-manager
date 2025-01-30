@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, SubmitField, FileField, DateField
 from wtforms.validators import DataRequired
-
+#fixed empty submission1 and added birthdate and address
 class ContactForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     phone = StringField('Phone', validators=[DataRequired()])
