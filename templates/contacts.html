@@ -2,9 +2,12 @@
 
 {% block content %}
 <h2>Contacts</h2>
-<div class="mb-3">
-    <input type="text" id="searchInput" class="form-control" placeholder="Search contacts...">
-</div>
+<form action="{{ url_for('list_contacts') }}" method="get" class="mb-4">
+    <div class="input-group">
+        <input type="text" name="search" class="form-control" placeholder="Search contacts..." value="{{ search_query or '' }}">
+        <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+</form>
 <table class="table">
     <thead>
         <tr>
