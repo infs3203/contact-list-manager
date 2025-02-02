@@ -20,10 +20,19 @@ with app.app_context():
 def index():
     return render_template('index.html')
 
-@app.route('/contacts')
+@app.route('/contacts', methods=['GET'])
 def list_contacts():
-    contacts = Contact.query.all()
-    return render_template('contacts.html', contacts=contacts)
+    query = request.args.get('query', '')
+    if query:
+        # Search by name or phone or email (you can modify based on your fields)
+        contacts = Contact.query.filter(
+            Contact.name.ilike(f'%{query}%') |
+            Contact.phone.ilike(f'%{query}%') |
+            Contact.email.ilike(f'%{query}%')
+        ).all()
+    else:
+        contacts = Contact.query.all()
+    return render_template('contacts.html', contacts=contacts, query=query)
 
 @app.route('/add', methods=['GET', 'POST'])
 def add_contact():
@@ -119,5 +128,17 @@ def delete_contact_api(id):
         db.session.commit()
     return '', 204  # Returns success even though nothing was deleted
 
-if __name__ == '__main__':
-    app.run(debug=True, port=5001) 
+@app.route('/search', methods=['GET'])
+def search_contacts():
+    query = request.args.get('query', '')
+    if query:
+        # Search by name or phone or email (you can modify based on your fields)
+        contacts = Contact.query.filter(
+            Contact.name.ilike(f'%{query}%') |
+            Contact.phone.ilike(f'%{query}%') |
+            Contact.email.ilike(f'%{query}%')
+        ).all()
+    else:
+        contacts = Contact.query.all()
+    return render_template('contacts.html', contacts=contacts, query=query)
+app.run(debug=True, port=5001)
