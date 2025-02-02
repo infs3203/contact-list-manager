@@ -2,7 +2,8 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, SubmitField
 
 class ContactForm(FlaskForm):
-    name = StringField('Name')
+    first = StringField('First Name')
+    last = StringField('Last Name')
     phone = StringField('Phone')
     email = StringField('Email')
     type = SelectField('Type', 

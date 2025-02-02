@@ -13,7 +13,9 @@ db.init_app(app)
 
 # Create database tables
 with app.app_context():
+    print("Creating database tables...")
     db.create_all()
+    print("Database tables created")
 
 # Web Routes
 @app.route('/')
@@ -30,7 +32,8 @@ def add_contact():
     form = ContactForm()
     if form.validate_on_submit():
         contact = Contact(
-            name=form.name.data,
+            first=form.first.data,
+            last=form.last.data,
             phone=form.phone.data,
             email=form.email.data,
             type=form.type.data
@@ -51,7 +54,8 @@ def update_contact(id):
     form = ContactForm(obj=contact)
     
     if form.validate_on_submit():
-        contact.name = form.name.data
+        contact.first = form.first.data
+        contact.last = form.last.data
         contact.phone = form.phone.data
         contact.email = form.email.data
         db.session.commit()
