@@ -45,7 +45,7 @@ def add_contact():
                 return redirect(url_for('list_contacts'))
         except Exception as e:
             db.session.rollback()
-            flash('Error adding contact. Phone number might be duplicate.', 'error')
+            flash('Error adding contact. Phone number might be duplicate or not in numbers.', 'error')
     return render_template('add_contact.html', form=form)
 
 @app.route('/update/<int:id>', methods=['GET', 'POST'])
