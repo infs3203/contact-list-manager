@@ -35,11 +35,14 @@ def add_contact():
             email=form.email.data,
             type=form.type.data
         )
+
+
         try:
-            db.session.add(contact)
-            db.session.commit()
-            flash('Contact added successfully!', 'success')
-            return redirect(url_for('list_contacts'))
+            if isnumeric(contact.phone):
+                db.session.add(contact)
+                db.session.commit()
+                flash('Contact added successfully!', 'success')
+                return redirect(url_for('list_contacts'))
         except Exception as e:
             db.session.rollback()
             flash('Error adding contact. Phone number might be duplicate.', 'error')
