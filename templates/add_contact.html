@@ -16,7 +16,7 @@
     
     <div class="mb-3">
         {{ form.phone.label(class="form-label") }}
-        {{ form.phone(class="form-control") }}
+        {{ form.phone(class="form-control", pattern="^\d+$", title="Phone number must contain only digits.") }}
         {% if form.phone.errors %}
             {% for error in form.phone.errors %}
                 <div class="text-danger">{{ error }}</div>
@@ -46,4 +46,4 @@
     
     {{ form.submit(class="btn btn-primary") }}
 </form>
-{% endblock %} 
+{% endblock %}
