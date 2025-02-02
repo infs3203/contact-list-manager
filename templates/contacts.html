@@ -5,7 +5,8 @@
 <div class="mb-3">
     <input type="text" id="searchInput" class="form-control" placeholder="Search contacts...">
 </div>
-<table class="table">
+
+<table class="table" id="contactsTable">
     <thead>
         <tr>
             <th>Name</th>
@@ -18,7 +19,7 @@
     <tbody>
         {% for contact in contacts %}
         <tr>
-            <td>{{ contact.name }}</td>
+            <td class="contact-name">{{ contact.name }}</td>
             <td>{{ contact.phone }}</td>
             <td>{{ contact.email }}</td>
             <td>{{ contact.type }}</td>
@@ -31,4 +32,17 @@
         {% endfor %}
     </tbody>
 </table>
-{% endblock %} 
+
+<script>
+document.getElementById('searchInput').addEventListener('input', function (e) {
+    const searchText = e.target.value.toLowerCase();
+    const rows = document.querySelectorAll('#contactsTable tbody tr');
+
+    rows.forEach(row => {
+        const name = row.querySelector('.contact-name').textContent.toLowerCase();
+        row.style.display = name.includes(searchText) ? '' : 'none';
+    });
+});
+</script>
+
+{% endblock %}
