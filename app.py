@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from models import db, Contact
 from forms import ContactForm
+from app import db, Contact
 import os
 
 app = Flask(__name__)
@@ -10,11 +11,19 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize the database
 db.init_app(app)
+with app.app_context():
+    db.create_all()
 
 # Create database tables
 with app.app_context():
     db.create_all()
 
+# Create a contact instance
+new_contact = Contact(name='Sami Suliman', phone='546443649', email='sami@udst.edu.qa', type='Personal')
+
+# Add and commit the contact to the database
+db.session.add(new_contact)
+db.session.commit()
 # Web Routes
 @app.route('/')
 def index():
@@ -32,6 +41,8 @@ def list_contacts():
         ).all()
     else:
         contacts = Contact.query.all()
+
+    print(contacts)  # This will print the contacts in the server console/logs (not in the browser)
     
     return render_template('contacts.html', contacts=contacts, query=query)
 
@@ -72,9 +83,12 @@ def update_contact(id):
 @app.route('/delete/<int:id>')
 def delete_contact(id):
     contact = Contact.query.get(id)
-    # Bug: Not actually deleting the contact but returning success
-    # db.session.delete(contact)
-    db.session.commit()
+    if contact:
+        db.session.delete(contact)  # Un-comment this line to delete the contact
+        db.session.commit()  # Commit the change to the database
+        flash('Contact deleted successfully!', 'success')
+    else:
+        flash('Contact not found.', 'error')
     return redirect(url_for('list_contacts'))
 
 # API Routes
@@ -91,11 +105,12 @@ def get_contact(id):
 @app.route('/api/contacts', methods=['POST'])
 def create_contact():
     data = request.get_json()
+
+    if not data.get('name') or not data['name'].strip():
+        return jsonify({'error': 'Name cannot be empty'}), 400
+
+    contact = Contact(name=data['name'], phone=data['phone'], email=data.get('email'))
     
-    if not all(k in data for k in ('name', 'phone', 'type')):
-        return jsonify({'error': 'Missing required fields'}), 400
-        
-    contact = Contact(**data)
     try:
         db.session.add(contact)
         db.session.commit()
@@ -119,27 +134,33 @@ def update_contact_api(id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 400
-
 @app.route('/api/contacts/<int:id>', methods=['DELETE'])
 def delete_contact_api(id):
     contact = Contact.query.get(id)
     if contact:
-        # Bug: Same issue in API - not actually deleting
-        # db.session.delete(contact)
-        db.session.commit()
-    return '', 204  # Returns success even though nothing was deleted
+        db.session.delete(contact)  # This line must stay
+        db.session.commit()  # Commit the change to the database
+        return '', 204  # No content (success)
+    else:
+        return jsonify({'error': 'Contact not found'}), 404  # Return an error if contact not found
+
 
 @app.route('/search', methods=['GET'])
 def search_contacts():
-    query = request.args.get('query', '')
+    query = request.args.get('query', '').strip()  # Stripped to avoid issues with extra spaces
+
     if query:
-        # Search by name or phone or email (you can modify based on your fields)
+        # Search in name, phone, and email columns
         contacts = Contact.query.filter(
             Contact.name.ilike(f'%{query}%') |
             Contact.phone.ilike(f'%{query}%') |
             Contact.email.ilike(f'%{query}%')
         ).all()
     else:
-        contacts = Contact.query.all()
-    return render_template('contacts.html', contacts=contacts, query=query)
-app.run(debug=True, port=5001)
+        contacts = []  # Return empty list if no query provided
+    
+    return jsonify([contact.to_dict() for contact in contacts])
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5001, debug=True)
+s
