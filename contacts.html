@@ -6,21 +6,27 @@
     <title>Contacts</title>
 </head>
 <body>
-    <h1>Contacts List</h1>
-
+    <h1>Contact List</h1>
+    
     <!-- Search Form -->
-    <form method="get" action="{{ url_for('list_contacts') }}">
-        <input type="text" name="query" value="{{ query }}" placeholder="Search contacts...">
+    <form action="{{ url_for('search_contacts') }}" method="get">
+        <input type="text" name="query" value="{{ query }}" placeholder="Search by name, phone, or email">
         <button type="submit">Search</button>
     </form>
 
-    <!-- Display Contacts -->
-    <ul>
-    {% for contact in contacts %}
-        <li>{{ contact.name }} - {{ contact.phone }} - {{ contact.email }}</li>
-    {% endfor %}
-    </ul>
-
-    <a href="{{ url_for('add_contact') }}">Add New Contact</a>
+    {% if contacts %}
+        <h2>Search Results</h2>
+        <ul>
+            {% for contact in contacts %}
+                <li>
+                    <strong>{{ contact.name }}</strong><br>
+                    Phone: {{ contact.phone }}<br>
+                    Email: {{ contact.email }}<br>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No contacts found.</p>
+    {% endif %}
 </body>
 </html>
