@@ -23,15 +23,16 @@ def index():
 @app.route('/contacts', methods=['GET'])
 def list_contacts():
     query = request.args.get('query', '')
+    
     if query:
-        # Search by name or phone or email (you can modify based on your fields)
         contacts = Contact.query.filter(
-            Contact.name.ilike(f'%{query}%') |
-            Contact.phone.ilike(f'%{query}%') |
-            Contact.email.ilike(f'%{query}%')
+            (Contact.name.ilike(f'%{query}%')) |
+            (Contact.phone.ilike(f'%{query}%')) |
+            (Contact.email.ilike(f'%{query}%'))
         ).all()
     else:
         contacts = Contact.query.all()
+    
     return render_template('contacts.html', contacts=contacts, query=query)
 
 @app.route('/add', methods=['GET', 'POST'])
