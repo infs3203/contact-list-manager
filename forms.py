@@ -35,3 +35,4 @@ class ContactForm(FlaskForm):
         ('Other', 'Other')
     ])
     submit = SubmitField('Submit')
+    
