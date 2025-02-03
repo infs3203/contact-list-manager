@@ -72,9 +72,12 @@ def update_contact(id):
 @app.route('/delete/<int:id>')
 def delete_contact(id):
     contact = Contact.query.get(id)
-    # Bug: Not actually deleting the contact but returning success
-    # db.session.delete(contact)
-    db.session.commit()
+    if contact:
+        db.session.delete(contact)  # Un-comment this line to delete the contact
+        db.session.commit()  # Commit the change to the database
+        flash('Contact deleted successfully!', 'success')
+    else:
+        flash('Contact not found.', 'error')
     return redirect(url_for('list_contacts'))
 
 # API Routes
@@ -119,15 +122,16 @@ def update_contact_api(id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 400
-
 @app.route('/api/contacts/<int:id>', methods=['DELETE'])
 def delete_contact_api(id):
     contact = Contact.query.get(id)
     if contact:
-        # Bug: Same issue in API - not actually deleting
-        # db.session.delete(contact)
-        db.session.commit()
-    return '', 204  # Returns success even though nothing was deleted
+        db.session.delete(contact)  # This line must stay
+        db.session.commit()  # Commit the change to the database
+        return '', 204  # No content (success)
+    else:
+        return jsonify({'error': 'Contact not found'}), 404  # Return an error if contact not found
+
 
 @app.route('/search', methods=['GET'])
 def search_contacts():
@@ -143,3 +147,4 @@ def search_contacts():
         contacts = Contact.query.all()
     return render_template('contacts.html', contacts=contacts, query=query)
 app.run(debug=True, port=5001)
+
