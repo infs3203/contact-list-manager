@@ -18,12 +18,13 @@ with app.app_context():
 with app.app_context():
     db.create_all()
 
-# Create a contact instance
-new_contact = Contact(name='Sami Suliman', phone='546443649', email='sami@udst.edu.qa', type='Personal')
+    # Create a contact instance
+    new_contact = Contact(name='Sami Suliman', phone='546443649', email='sami@udst.edu.qa', type='Personal')
 
-# Add and commit the contact to the database
-db.session.add(new_contact)
-db.session.commit()
+    # Add and commit the contact to the database
+    db.session.add(new_contact)
+    db.session.commit()
+    
 # Web Routes
 @app.route('/')
 def index():
@@ -163,4 +164,7 @@ def search_contacts():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001, debug=True)
-s
+
+
+
+
