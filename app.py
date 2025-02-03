@@ -96,11 +96,12 @@ def get_contact(id):
 @app.route('/api/contacts', methods=['POST'])
 def create_contact():
     data = request.get_json()
+
+    if not data.get('name') or not data['name'].strip():
+        return jsonify({'error': 'Name cannot be empty'}), 400
+
+    contact = Contact(name=data['name'], phone=data['phone'], email=data.get('email'))
     
-    if not all(k in data for k in ('name', 'phone', 'type')):
-        return jsonify({'error': 'Missing required fields'}), 400
-        
-    contact = Contact(**data)
     try:
         db.session.add(contact)
         db.session.commit()

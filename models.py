@@ -20,6 +20,12 @@ class Contact(db.Model):
             raise ValueError("Phone number must be exactly 10 digits.")
         return phone
     
+    @validates('name')
+    def validate_name(self, key, name):
+        if not name.strip():
+            raise ValueError("Name cannot be empty.")
+        return name
+    
     def to_dict(self):
         return {
             'id': self.id,
@@ -29,3 +35,4 @@ class Contact(db.Model):
             'type': self.type,
             'created_at': self.created_at.isoformat()
         }
+    
