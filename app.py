@@ -22,22 +22,29 @@ def index():
 def list_contacts():
     search = request.args.get('search', default='', type=str)
     group = request.args.get('group', default='', type=str)
-    tags = request.args.get('tags', default='', type=str)
 
     query = Contact.query
-
     if search:
         query = query.filter(Contact.name.ilike(f"%{search}%"))
-
     if group:
         query = query.filter(Contact.type == group)
 
-    # Only apply this filter if the tags column exists.
-    if tags and hasattr(Contact, 'tags'):
-        query = query.filter(Contact.tags.ilike(f"%{tags}%"))
-
     contacts = query.all()
     return render_template('contacts.html', contacts=contacts)
+
+@app.route('/api/contacts', methods=['GET'])
+def api_contacts():
+    search = request.args.get('search', default='', type=str)
+    group = request.args.get('group', default='', type=str)
+
+    query = Contact.query
+    if search:
+        query = query.filter(Contact.name.ilike(f"%{search}%"))
+    if group:
+        query = query.filter(Contact.type == group)
+
+    contacts = query.all()
+    return jsonify([contact.to_dict() for contact in contacts])
 
 @app.route('/add', methods=['GET', 'POST'])
 def add_contact():
