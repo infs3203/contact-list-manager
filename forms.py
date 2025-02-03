@@ -1,22 +1,6 @@
-# from flask_wtf import FlaskForm
-# from wtforms import StringField, SelectField, SubmitField
-
-# class ContactForm(FlaskForm):
-#     name = StringField('Name')
-#     phone = StringField('Phone')
-#     email = StringField('Email')
-#     type = SelectField('Type', 
-#                       choices=[('Personal', 'Personal'), 
-#                               ('Work', 'Work'), 
-#                               ('Other', 'Other')])
-#     submit = SubmitField('Submit') 
-
-
-
-
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, SubmitField
-from wtforms.validators import DataRequired, Length, Regexp
+from wtforms.validators import DataRequired, Length, Regexp, Email
 
 class ContactForm(FlaskForm):
     name = StringField('Name', validators=[
@@ -28,7 +12,9 @@ class ContactForm(FlaskForm):
         DataRequired(message="Phone number is required."),
         Regexp(r'^\+?[0-9]*$', message="Phone number must contain only digits and an optional '+' symbol.")
     ])
-    email = StringField('Email')
+    email = StringField('Email', validators=[
+        Email(message="Please enter a valid email address.")  # Email validation
+    ])
     type = SelectField('Type', choices=[
         ('Personal', 'Personal'), 
         ('Work', 'Work'), 
