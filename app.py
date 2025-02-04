@@ -54,6 +54,7 @@ def update_contact(id):
         contact.name = form.name.data
         contact.phone = form.phone.data
         contact.email = form.email.data
+        contact.type = form.type.data         #Fix: Ensure 'type' is updated
         db.session.commit()
         return redirect(url_for('list_contacts'))
     
