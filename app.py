@@ -50,39 +50,51 @@ def api_contacts():
 def add_contact():
     form = ContactForm()
     if form.validate_on_submit():
-        contact = Contact(
-            name=form.name.data,
-            phone=form.phone.data,
-            email=form.email.data,
-            type=form.type.data
-        )
-        try:
-            db.session.add(contact)
-            db.session.commit()
-            flash('Contact added successfully!', 'success')
-            return redirect(url_for('list_contacts'))
-        except Exception as e:
-            db.session.rollback()
-            flash('Error adding contact.', 'danger')
+        # Check for existing contact with the same name or email
+        existing_contact = Contact.query.filter(
+            (Contact.name == form.name.data) | (Contact.email == form.email.data)
+        ).first()
+
+        if existing_contact:
+            flash('A contact with this name or email already exists.', 'danger')
+        else:
+            contact = Contact(
+                name=form.name.data,
+                phone=form.phone.data,
+                email=form.email.data,
+                type=form.type.data
+            )
+            try:
+                db.session.add(contact)
+                db.session.commit()
+                flash('Contact added successfully!', 'success')
+                return redirect(url_for('list_contacts'))
+            except Exception as e:
+                db.session.rollback()
+                flash('Error adding contact.', 'danger')
+
     return render_template('add_contact.html', form=form)
+
 
 @app.route('/update/<int:id>', methods=['GET', 'POST'])
 def update_contact(id):
     contact = Contact.query.get_or_404(id)
     form = ContactForm(obj=contact)
+
     if form.validate_on_submit():
-        contact.name = form.name.data
-        contact.phone = form.phone.data
-        contact.email = form.email.data
-        contact.type = form.type.data
-        try:
-            db.session.commit()
-            flash('Contact updated successfully!', 'success')
-            return redirect(url_for('list_contacts'))
-        except Exception as e:
-            db.session.rollback()
-            flash('Error updating contact.', 'danger')
-    return render_template('update_contact.html', form=form, contact=contact)
+        # Check for existing contact with the same name or email (excluding current contact)
+        existing_contact = Contact.query.filter(
+            ((Contact.name == form.name.data) | (Contact.email == form.email.data)) &
+            (Contact.id != id)
+        ).first()
+
+        if existing_contact:
+            flash('Another contact with this name or email already exists.', 'danger')
+        else:
+            contact.name = form.name.data
+            contact.phone = form.phone.data
+            contact.email
+
 
 @app.route('/delete/<int:id>', methods=['GET', 'POST'])
 def delete_contact(id):

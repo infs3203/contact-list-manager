@@ -15,7 +15,6 @@
         <option value="Other" {% if request.args.get('group')=='Other' %}selected{% endif %}>Other</option>
       </select>
     </div>
-    <!-- Removed the Filter button since live search is enabled -->
   </div>
 </form>
 
@@ -32,7 +31,13 @@
   <tbody>
     {% for contact in contacts %}
     <tr>
-      <td>{{ contact.name }}</td>
+      <td>
+        {% if contact.name|length > 10 %}
+          {{ contact.name[:10] }}...
+        {% else %}
+          {{ contact.name }}
+        {% endif %}
+      </td>
       <td>{{ contact.phone }}</td>
       <td>{{ contact.email }}</td>
       <td>{{ contact.type }}</td>
