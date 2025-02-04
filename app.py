@@ -56,6 +56,7 @@ def update_contact(id):
         contact.email = form.email.data
         contact.type = form.type.data         #Fix: Ensure 'type' is updated
         db.session.commit()
+        flash('Contact updated successfully!', 'success')  # ✅ Added flash message
         return redirect(url_for('list_contacts'))
     
     return render_template('update_contact.html', form=form, contact=contact)
