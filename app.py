@@ -117,7 +117,6 @@ def update_contact_api(id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 400
-
 @app.route('/api/contacts/<int:id>', methods=['DELETE'])
 def delete_contact_api(id):
     contact = Contact.query.get(id)
@@ -128,10 +127,12 @@ def delete_contact_api(id):
     else:
         return jsonify({'error': 'Contact not found'}), 404  # Return an error if contact not found
 
+HEAD
 if __name__ == '__main__':
     app.run(debug=True, port=5001) 
 
             
+Unable-to-Delete-contacts
 
 def search_contacts():
     query = request.args.get('query', '').strip()  # Stripped to avoid issues with extra spaces
@@ -144,6 +145,7 @@ def search_contacts():
             Contact.email.ilike(f'%{query}%')
         ).all()
     else:
+HEAD
         contacts = []  # Return empty list if no query provided
     
     return jsonify([contact.to_dict() for contact in contacts])
@@ -153,4 +155,9 @@ if __name__ == "__main__":
     
 
 
+
+        contacts = Contact.query.all()
+    return render_template('contacts.html', contacts=contacts, query=query)
+app.run(debug=True, port=5001)
+ Unable-to-Delete-contacts
 
