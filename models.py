@@ -22,3 +22,8 @@ class Contact(db.Model):
             'type': self.type,
             'created_at': self.created_at.isoformat()
         } 
+
+
+
+
+
