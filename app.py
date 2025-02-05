@@ -22,13 +22,37 @@ def index():
 
 @app.route('/contacts')
 def list_contacts():
-    contacts = Contact.query.all()
-    return render_template('contacts.html', contacts=contacts)
+    search_query = request.args.get('search', '').strip()
+    
+    if search_query:
+        # Search in name, email, phone, and type fields
+        contacts = Contact.query.filter(
+            db.or_(
+                Contact.name.ilike(f'%{search_query}%'),
+                Contact.email.ilike(f'%{search_query}%'),
+                Contact.phone.ilike(f'%{search_query}%'),
+                Contact.type.ilike(f'%{search_query}%')
+            )
+        ).all()
+    else:
+        contacts = Contact.query.all()
+        
+    return render_template('contacts.html', contacts=contacts, search_query=search_query)
 
 @app.route('/add', methods=['GET', 'POST'])
 def add_contact():
     form = ContactForm()
     if form.validate_on_submit():
+        # Add validation for empty fields
+        if not form.name.data or not form.phone.data or not form.email.data or not form.type.data:
+            flash('All fields are required!', 'error')
+            return render_template('add_contact.html', form=form)
+            
+        # Add email validation
+        if '@' not in form.email.data or '.' not in form.email.data:
+            flash('Please enter a valid email address!', 'error')
+            return render_template('add_contact.html', form=form)
+            
         contact = Contact(
             name=form.name.data,
             phone=form.phone.data,
@@ -50,6 +74,16 @@ def update_contact(id):
     contact = db.session.get(Contact, id)
     form = ContactForm(obj=contact)
     if form.validate_on_submit():
+        # Add validation for empty fields
+        if not form.name.data or not form.phone.data or not form.email.data or not form.type.data:
+            flash('All fields are required!', 'error')
+            return render_template('update_contact.html', form=form, contact=contact)
+            
+        # Add email validation
+        if '@' not in form.email.data or '.' not in form.email.data:
+            flash('Please enter a valid email address!', 'error')
+            return render_template('update_contact.html', form=form, contact=contact)
+            
         contact.name = form.name.data
         contact.phone = form.phone.data
         contact.email = form.email.data
